@@ -1,0 +1,5 @@
+<launch>
+	<node pkg = "SkypeRobot" name="SkypeTalker" type = "SkypeTalker.py"/>
+	<node pkg = "SkypeRobot" name="MsgProcesser" type = "MsgProcesser.py"/>
+
+</launch>
