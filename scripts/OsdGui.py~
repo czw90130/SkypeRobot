@@ -1,0 +1,241 @@
+#! /usr/bin/env python
+import roslib
+roslib.load_manifest('SkypeRobot')
+import sys
+import rospy
+import cv
+import math
+from std_msgs.msg import String
+from sensor_msgs.msg import Image
+from cv_bridge import CvBridge, CvBridgeError
+
+from SkypeRobot.msg import Angles
+from SkypeRobot.msg import Hands
+
+class gui_generator:
+    def __init__(self, imgdir):
+        
+        self.menu_bar = cv.LoadImage(imgdir+'menu_bar.jpg')
+        self.menu_bar_msk = cv.LoadImage(imgdir+'menu_bar_msk.png', 0)
+        self.menu_bk = cv.LoadImage(imgdir+'menu_bk.jpg')
+        self.hp_r = cv.LoadImage(imgdir+'HandPointer.png')
+        self.hp_r_msk = cv.LoadImage(imgdir+'HandPointer.png', 0)
+        self.hp_r_bk = cv.LoadImage(imgdir+'HandPointer_outer_R0.jpg')
+        self.hp_hd_r = cv.LoadImage(imgdir+'HandPointerHold.png')
+        self.hp_hd_r_msk = cv.LoadImage(imgdir+'HandPointerHold.png', 0)
+        self.hp_hd_r_bk = cv.LoadImage(imgdir+'HandPointerHold_outer.jpg')
+        self.hp_l = cv.LoadImage(imgdir+'HandPointer_L.png')
+        self.hp_l_msk = cv.LoadImage(imgdir+'HandPointer_L.png', 0)
+        self.hp_l_bk = cv.LoadImage(imgdir+'HandPointer_outer_R0_L.jpg')
+        self.hp_hd_l = cv.LoadImage(imgdir+'HandPointerHold_L.png')
+        self.hp_hd_l_msk = cv.LoadImage(imgdir+'HandPointerHold_L.png', 0)
+        self.hp_hd_l_bk = cv.LoadImage(imgdir+'HandPointerHold_outer_L.jpg')
+        
+        self.rhand_x = 0
+        self.rhand_y = 0
+        self.rhand_st = 0
+        self.lhand_x = 0
+        self.lhand_y = 0
+        self.lhand_st = 0
+
+        self.prelhst = 0
+        self.prerhst = 0
+        self.imgdir = imgdir
+
+        self.hands_sub = rospy.Subscriber("robotHands", Hands, self.callback_hands)
+        self.hands_sub = rospy.Subscriber("robotAngles", Angles, self.callback_angles)
+
+
+    def setMenu(self, bk_img, showpr):
+        pt = 120 - showpr*120/100
+               
+        temp = cv.GetImage(bk_img)
+        cv.SetImageROI(temp,(0, 0, temp.width-pt, temp.height))    
+
+        cv.SetImageROI(self.menu_bar,(pt, 0, self.menu_bar.width, self.menu_bar.height)) 
+        cv.SetImageROI(self.menu_bar_msk,(pt, 0, self.menu_bar.width, self.menu_bar.height)) 
+        cv.Copy(self.menu_bar, temp, self.menu_bar_msk)
+        cv.ResetImageROI(self.menu_bar)
+        cv.ResetImageROI(self.menu_bar_msk)
+
+        cv.SetImageROI(self.menu_bk,(pt, 0, self.menu_bk.width, self.menu_bk.height))
+        cv.AddWeighted(temp, 1.0, self.menu_bk,  0.5, 0,temp)
+        cv.ResetImageROI(self.menu_bk)
+
+        cv.ResetImageROI(temp)
+        cv.Copy(cv.GetMat(temp),bk_img)
+
+    def setHandPointer(self, bk_img):
+        temp_bk = cv.GetImage(bk_img)
+        
+        temp = cv.CreateImage((752,600), 8, 3)
+        cv.SetImageROI(temp,(56, 60, temp_bk.width, temp_bk.height))
+        cv.Copy(temp_bk, temp)
+        cv.ResetImageROI(temp)
+
+        
+        cv.SetImageROI(temp,(self.rhand_x*696/640, self.rhand_y*540/480, 56, 60))
+        if 100 > self.rhand_st:
+            if self.prerhst != self.rhand_st:
+                ct = self.rhand_st - 2
+                if ct < 0:
+                    ct = 0
+                elif ct > 3:
+                    ct = 3
+
+                self.hp_r_bk = cv.LoadImage(self.imgdir+'HandPointer_outer_R'+str(ct)+'.jpg')
+                self.prerhst = self.rhand_st
+            
+            cv.Copy(self.hp_r, temp, self.hp_r_msk)
+            cv.AddWeighted(temp, 1.0, self.hp_r_bk, 1, 0,temp)
+        else:
+            cv.Copy(self.hp_hd_r, temp, self.hp_hd_r_msk)
+            cv.AddWeighted(temp, 1.0, self.hp_hd_r_bk, 1, 0,temp)
+        cv.ResetImageROI(temp)
+
+        cv.SetImageROI(temp,(self.lhand_x*696/640, self.lhand_y*540/480, 56, 60))
+        if 100 > self.lhand_st:
+            if self.prelhst != self.lhand_st:
+                ct = self.lhand_st - 2
+                if ct < 0:
+                    ct = 0
+                elif ct > 3:
+                    ct = 3
+
+                self.hp_l_bk = cv.LoadImage(self.imgdir+'HandPointer_outer_R'+str(ct)+'_L.jpg')
+                self.prelhst = self.lhand_st
+
+            cv.Copy(self.hp_l, temp, self.hp_l_msk)
+            cv.AddWeighted(temp, 1.0, self.hp_l_bk, 1, 0,temp)            
+        else:
+            cv.Copy(self.hp_hd_l, temp, self.hp_hd_l_msk)
+            cv.AddWeighted(temp, 1.0, self.hp_hd_l_bk, 1, 0,temp)
+        cv.ResetImageROI(temp)
+        #cv.ShowImage("Image window", temp)
+        cv.SetImageROI(temp,(56, 60, temp_bk.width, temp_bk.height))
+        cv.Copy(temp, bk_img)
+    
+
+    def callback_hands(self, data):
+        self.lhand_st = data.HandLeft
+        self.rhand_st = data.HandRight
+
+    def callback_angles(self, data):
+        bias = math.fabs(data.HandXLeft-320)*22/320 +  math.fabs(data.HandYLeft-240)*22/240
+        if 100 < self.lhand_st:
+            self.lhand_x = data.HandXLeft
+            self.lhand_y = data.HandYLeft 
+        elif 0 == data.HandXLeft or 640 == data.HandXLeft  or 0 == data.HandYLeft  or 480 == data.HandYLeft:
+            self.lhand_st = 0
+            self.lhand_x = data.HandXLeft
+            self.lhand_y = data.HandYLeft 
+        
+        elif data.ShoulderElbowWristLeft < 90 - bias:
+            if self.lhand_st <15:
+                self.lhand_st = self.lhand_st + 1
+            
+            if(2 > self.lhand_st):
+                self.lhand_x = data.HandXLeft
+                self.lhand_y = data.HandYLeft 
+    
+        elif data.ShoulderElbowWristLeft > 90 - bias:
+            self.lhand_st = self.lhand_st - 5
+            if self.lhand_st < 0:
+               self.lhand_st = 0
+
+            if(2 > self.lhand_st):
+                self.lhand_x = data.HandXLeft
+                self.lhand_y = data.HandYLeft 
+ 
+
+        bias = math.fabs(data.HandXRight-320)*22/320 +  math.fabs(data.HandYRight-240)*22/240
+        if 100 < self.rhand_st:
+            self.rhand_x = data.HandXRight
+            self.rhand_y = data.HandYRight
+        elif 0 == data.HandXRight or 640 == data.HandXRight  or 0 == data.HandYRight  or 480 == data.HandYRight:
+            self.rhand_st = 0
+            self.rhand_x = data.HandXRight
+            self.rhand_y = data.HandYRight
+        
+        elif data.ShoulderElbowWristRight < 90 - bias:
+            if self.rhand_st <15:
+                self.rhand_st = self.rhand_st + 1
+            
+            if(2 > self.rhand_st):
+                self.rhand_x = data.HandXRight
+                self.rhand_y = data.HandYRight 
+    
+        elif data.ShoulderElbowWristRight > 90 - bias:
+            self.rhand_st = self.rhand_st - 5
+            if self.rhand_st < 0:
+               self.rhand_st = 0
+
+            if(2 > self.rhand_st):
+                self.rhand_x = data.HandXRight
+                self.rhand_y = data.HandYRight
+
+            
+            
+        
+        
+        
+
+class image_converter:
+    def __init__(self, gui):
+        self.image_pub = rospy.Publisher("vcamera",Image)
+        
+        cv.NamedWindow("Image window", 1)
+        self.bridge = CvBridge()
+        self.image_sub = rospy.Subscriber("image", Image, self.callback)
+        self.bk_image = cv.CreateMat(480,640,cv.CV_8UC3)        
+        self.gui = gui
+    
+    def callback(self, data):
+        
+        
+        try:
+            cv_image = self.bridge.imgmsg_to_cv(data, "bgr8")
+        except CvBridgeError, e:
+            rospy.logerr(e)
+        
+        try:
+            cv.Resize(cv_image, self.bk_image)
+            cv.Flip(self.bk_image,self.bk_image, 1)
+        except cv.error, e:
+            rospy.logerr(e) 
+
+        self.gui.setMenu(self.bk_image, 10)
+        self.gui.setHandPointer(self.bk_image)
+        
+        cv.ShowImage("Image window", self.bk_image)
+        cv.WaitKey(3)
+
+        try:
+            self.image_pub.publish(self.bridge.cv_to_imgmsg(cv_image, "bgr8"))
+        except CvBridgeError, e:
+            rospy.logerr(e)
+
+def main(args):
+    
+    rospy.init_node('osd_gui', anonymous=True)
+    
+
+    ind = args[0].rfind('/')
+    gui = gui_generator(args[0][0:ind]+'/../images/')
+    
+    ic = image_converter(gui)
+    
+    if rospy.names.remap_name("image") == "image":
+        rospy.logwarn('Topic \'image\' has not been remapped!')
+
+    try:
+        rospy.spin()
+    except KeyboardInterrupt:
+        print "Shutting down"
+    cv.DestroyAllWindows()
+
+if __name__ == '__main__':
+    main(sys.argv)
+            
+
+
