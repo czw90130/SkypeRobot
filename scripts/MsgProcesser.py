@@ -65,10 +65,10 @@ class Parse(object):
 				pos2 = pos +1
 				pos = data.find(':',pos2)
 				strType = data[pos2:pos]
-				if(0 > strType.find('H')):
+				if(-1 != strType.find('H')):
 					break
 				
-				pos2 = pos +1
+				pos2 = pos + 1
 				pos = data.find(':',pos2)				
 			
 				if 0 == int(strType):
