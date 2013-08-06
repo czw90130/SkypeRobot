@@ -8,6 +8,7 @@ SET(CMAKE_MULTIPLE_OUTPUT_PAIRS
   "/home/user/ros_workspace/sandbox/SkypeRobot/msg_gen/lisp/_package.lisp" "/home/user/ros_workspace/sandbox/SkypeRobot/msg_gen/lisp/Angles.lisp"
   "/home/user/ros_workspace/sandbox/SkypeRobot/msg_gen/lisp/_package_Angles.lisp" "/home/user/ros_workspace/sandbox/SkypeRobot/msg_gen/lisp/Angles.lisp"
   "/home/user/ros_workspace/sandbox/SkypeRobot/msg_gen/lisp/_package_Hands.lisp" "/home/user/ros_workspace/sandbox/SkypeRobot/msg_gen/lisp/Hands.lisp"
+  "/home/user/ros_workspace/sandbox/SkypeRobot/msg_gen/lisp/_package_Whells.lisp" "/home/user/ros_workspace/sandbox/SkypeRobot/msg_gen/lisp/Whells.lisp"
   )
 
 

@@ -5,6 +5,7 @@ FILE(REMOVE_RECURSE
   "CMakeFiles/ROSBUILD_genmsg_py"
   "../src/SkypeRobot/msg/__init__.py"
   "../src/SkypeRobot/msg/_Angles.py"
+  "../src/SkypeRobot/msg/_Whells.py"
   "../src/SkypeRobot/msg/_Hands.py"
 )
 

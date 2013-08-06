@@ -3,6 +3,8 @@
   (:export
    "<ANGLES>"
    "ANGLES"
+   "<WHELLS>"
+   "WHELLS"
    "<HANDS>"
    "HANDS"
   ))

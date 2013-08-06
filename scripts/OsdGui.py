@@ -11,13 +11,14 @@ from cv_bridge import CvBridge, CvBridgeError
 
 from SkypeRobot.msg import Angles
 from SkypeRobot.msg import Hands
+from SkypeRobot.msg import Whells
 
 class gui_generator:
     def __init__(self, imgdir):
         
         self.menu_bar = cv.LoadImage(imgdir+'menu_bar.jpg')
         self.menu_bar_msk = cv.LoadImage(imgdir+'menu_bar_msk.png', 0)
-        self.menu_bk = cv.LoadImage(imgdir+'menu_bk.jpg')
+        self.move_bk = cv.LoadImage(imgdir+'move_bk.jpg')
         self.hp_r = cv.LoadImage(imgdir+'HandPointer.png')
         self.hp_r_msk = cv.LoadImage(imgdir+'HandPointer.png', 0)
         self.hp_r_bk = cv.LoadImage(imgdir+'HandPointer_outer_R0.jpg')
@@ -45,7 +46,6 @@ class gui_generator:
         self.hands_sub = rospy.Subscriber("robotHands", Hands, self.callback_hands)
         self.hands_sub = rospy.Subscriber("robotAngles", Angles, self.callback_angles)
 
-
     def setMenu(self, bk_img, showpr):
         pt = 120 - showpr*120/100
                
@@ -63,6 +63,12 @@ class gui_generator:
         cv.ResetImageROI(self.menu_bk)
 
         cv.ResetImageROI(temp)
+        cv.Copy(cv.GetMat(temp),bk_img)
+
+    def setMoveBk(self, bk_img):
+               
+        temp = cv.GetImage(bk_img)
+        cv.AddWeighted(temp, 1.0, self.move_bk,  0.5, 0,temp)
         cv.Copy(cv.GetMat(temp),bk_img)
 
     def setHandPointer(self, bk_img):
@@ -189,6 +195,38 @@ class image_converter:
         self.image_sub = rospy.Subscriber("image", Image, self.callback)
         self.bk_image = cv.CreateMat(480,640,cv.CV_8UC3)        
         self.gui = gui
+
+        self.whell_pub = rospy.Publisher('robotWhells', Whells)
+
+        self.pre_whell = Whells()
+        self.pre_whell.RightWhell = 0
+        self.pre_whell.LeftWhell = 0
+
+    def setWhells(self):
+
+        if self.gui.rhand_st > 200 and self.gui.lhand_st > 200:
+            whell = Whells()
+            if self.gui.rhand_y + 30 < 220:
+                whell.RightWhell = 1
+            elif self.gui.rhand_y + 30 > 348:
+                whell.RightWhell = -1
+            else:
+                whell.RightWhell = 0
+
+            if self.gui.lhand_y + 30 < 220:
+                whell.LeftWhell = 1
+            elif self.gui.lhand_y + 30 > 348:
+                whell.LeftWhell = -1
+            else:
+                whell.LeftWhell = 0
+                
+            if whell.RightWhell != self.pre_whell.RightWhell or whell.LeftWhell != self.pre_whell.LeftWhell:
+                self.whell_pub.publish(whell)
+                self.pre_whell.RightWhell = whell.RightWhell
+                self.pre_whell.LeftWhell = whell.LeftWhell
+            
+            
+
     
     def callback(self, data):
         
@@ -204,8 +242,16 @@ class image_converter:
         except cv.error, e:
             rospy.logerr(e) 
 
-        self.gui.setMenu(self.bk_image, 10)
+        #self.gui.setMenu(self.bk_image, 10)
+        
+        #Set the background
+        # if mode == move
+        self.gui.setMoveBk(self.bk_image)
+
         self.gui.setHandPointer(self.bk_image)
+        # if mode == move
+        self.setWhells()
+        
         
         cv.ShowImage("Image window", self.bk_image)
         cv.WaitKey(3)

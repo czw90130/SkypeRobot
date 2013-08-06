@@ -45,10 +45,11 @@ include CMakeFiles/ROSBUILD_genmsg_py.dir/progress.make
 CMakeFiles/ROSBUILD_genmsg_py: ../src/SkypeRobot/msg/__init__.py
 
 ../src/SkypeRobot/msg/__init__.py: ../src/SkypeRobot/msg/_Angles.py
+../src/SkypeRobot/msg/__init__.py: ../src/SkypeRobot/msg/_Whells.py
 ../src/SkypeRobot/msg/__init__.py: ../src/SkypeRobot/msg/_Hands.py
 	$(CMAKE_COMMAND) -E cmake_progress_report /home/user/ros_workspace/sandbox/SkypeRobot/build/CMakeFiles $(CMAKE_PROGRESS_1)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/SkypeRobot/msg/__init__.py"
-	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --initpy /home/user/ros_workspace/sandbox/SkypeRobot/msg/Angles.msg /home/user/ros_workspace/sandbox/SkypeRobot/msg/Hands.msg
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --initpy /home/user/ros_workspace/sandbox/SkypeRobot/msg/Angles.msg /home/user/ros_workspace/sandbox/SkypeRobot/msg/Whells.msg /home/user/ros_workspace/sandbox/SkypeRobot/msg/Hands.msg
 
 ../src/SkypeRobot/msg/_Angles.py: ../msg/Angles.msg
 ../src/SkypeRobot/msg/_Angles.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
@@ -66,6 +67,22 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/SkypeRobot/msg/__init__.py
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/SkypeRobot/msg/_Angles.py"
 	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/user/ros_workspace/sandbox/SkypeRobot/msg/Angles.msg
 
+../src/SkypeRobot/msg/_Whells.py: ../msg/Whells.msg
+../src/SkypeRobot/msg/_Whells.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
+../src/SkypeRobot/msg/_Whells.py: /opt/ros/fuerte/share/roslib/bin/gendeps
+../src/SkypeRobot/msg/_Whells.py: ../manifest.xml
+../src/SkypeRobot/msg/_Whells.py: /opt/ros/fuerte/share/std_msgs/manifest.xml
+../src/SkypeRobot/msg/_Whells.py: /opt/ros/fuerte/share/roslang/manifest.xml
+../src/SkypeRobot/msg/_Whells.py: /opt/ros/fuerte/share/rospy/manifest.xml
+../src/SkypeRobot/msg/_Whells.py: /opt/ros/fuerte/share/roscpp/manifest.xml
+../src/SkypeRobot/msg/_Whells.py: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+../src/SkypeRobot/msg/_Whells.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+../src/SkypeRobot/msg/_Whells.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+../src/SkypeRobot/msg/_Whells.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/user/ros_workspace/sandbox/SkypeRobot/build/CMakeFiles $(CMAKE_PROGRESS_3)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/SkypeRobot/msg/_Whells.py"
+	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/user/ros_workspace/sandbox/SkypeRobot/msg/Whells.msg
+
 ../src/SkypeRobot/msg/_Hands.py: ../msg/Hands.msg
 ../src/SkypeRobot/msg/_Hands.py: /opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py
 ../src/SkypeRobot/msg/_Hands.py: /opt/ros/fuerte/share/roslib/bin/gendeps
@@ -78,13 +95,14 @@ CMakeFiles/ROSBUILD_genmsg_py: ../src/SkypeRobot/msg/__init__.py
 ../src/SkypeRobot/msg/_Hands.py: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
 ../src/SkypeRobot/msg/_Hands.py: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
 ../src/SkypeRobot/msg/_Hands.py: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/user/ros_workspace/sandbox/SkypeRobot/build/CMakeFiles $(CMAKE_PROGRESS_3)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/user/ros_workspace/sandbox/SkypeRobot/build/CMakeFiles $(CMAKE_PROGRESS_4)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../src/SkypeRobot/msg/_Hands.py"
 	/opt/ros/fuerte/share/rospy/rosbuild/scripts/genmsg_py.py --noinitpy /home/user/ros_workspace/sandbox/SkypeRobot/msg/Hands.msg
 
 ROSBUILD_genmsg_py: CMakeFiles/ROSBUILD_genmsg_py
 ROSBUILD_genmsg_py: ../src/SkypeRobot/msg/__init__.py
 ROSBUILD_genmsg_py: ../src/SkypeRobot/msg/_Angles.py
+ROSBUILD_genmsg_py: ../src/SkypeRobot/msg/_Whells.py
 ROSBUILD_genmsg_py: ../src/SkypeRobot/msg/_Hands.py
 ROSBUILD_genmsg_py: CMakeFiles/ROSBUILD_genmsg_py.dir/build.make
 .PHONY : ROSBUILD_genmsg_py

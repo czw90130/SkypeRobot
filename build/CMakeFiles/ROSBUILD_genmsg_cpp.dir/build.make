@@ -43,6 +43,7 @@ CMAKE_BINARY_DIR = /home/user/ros_workspace/sandbox/SkypeRobot/build
 include CMakeFiles/ROSBUILD_genmsg_cpp.dir/progress.make
 
 CMakeFiles/ROSBUILD_genmsg_cpp: ../msg_gen/cpp/include/SkypeRobot/Angles.h
+CMakeFiles/ROSBUILD_genmsg_cpp: ../msg_gen/cpp/include/SkypeRobot/Whells.h
 CMakeFiles/ROSBUILD_genmsg_cpp: ../msg_gen/cpp/include/SkypeRobot/Hands.h
 
 ../msg_gen/cpp/include/SkypeRobot/Angles.h: ../msg/Angles.msg
@@ -61,6 +62,22 @@ CMakeFiles/ROSBUILD_genmsg_cpp: ../msg_gen/cpp/include/SkypeRobot/Hands.h
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/cpp/include/SkypeRobot/Angles.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/genmsg_cpp.py /home/user/ros_workspace/sandbox/SkypeRobot/msg/Angles.msg
 
+../msg_gen/cpp/include/SkypeRobot/Whells.h: ../msg/Whells.msg
+../msg_gen/cpp/include/SkypeRobot/Whells.h: /opt/ros/fuerte/share/roscpp/rosbuild/scripts/genmsg_cpp.py
+../msg_gen/cpp/include/SkypeRobot/Whells.h: /opt/ros/fuerte/share/roslib/bin/gendeps
+../msg_gen/cpp/include/SkypeRobot/Whells.h: ../manifest.xml
+../msg_gen/cpp/include/SkypeRobot/Whells.h: /opt/ros/fuerte/share/std_msgs/manifest.xml
+../msg_gen/cpp/include/SkypeRobot/Whells.h: /opt/ros/fuerte/share/roslang/manifest.xml
+../msg_gen/cpp/include/SkypeRobot/Whells.h: /opt/ros/fuerte/share/rospy/manifest.xml
+../msg_gen/cpp/include/SkypeRobot/Whells.h: /opt/ros/fuerte/share/roscpp/manifest.xml
+../msg_gen/cpp/include/SkypeRobot/Whells.h: /opt/ros/fuerte/share/geometry_msgs/manifest.xml
+../msg_gen/cpp/include/SkypeRobot/Whells.h: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
+../msg_gen/cpp/include/SkypeRobot/Whells.h: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
+../msg_gen/cpp/include/SkypeRobot/Whells.h: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/user/ros_workspace/sandbox/SkypeRobot/build/CMakeFiles $(CMAKE_PROGRESS_2)
+	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/cpp/include/SkypeRobot/Whells.h"
+	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/genmsg_cpp.py /home/user/ros_workspace/sandbox/SkypeRobot/msg/Whells.msg
+
 ../msg_gen/cpp/include/SkypeRobot/Hands.h: ../msg/Hands.msg
 ../msg_gen/cpp/include/SkypeRobot/Hands.h: /opt/ros/fuerte/share/roscpp/rosbuild/scripts/genmsg_cpp.py
 ../msg_gen/cpp/include/SkypeRobot/Hands.h: /opt/ros/fuerte/share/roslib/bin/gendeps
@@ -73,12 +90,13 @@ CMakeFiles/ROSBUILD_genmsg_cpp: ../msg_gen/cpp/include/SkypeRobot/Hands.h
 ../msg_gen/cpp/include/SkypeRobot/Hands.h: /opt/ros/fuerte/share/sensor_msgs/manifest.xml
 ../msg_gen/cpp/include/SkypeRobot/Hands.h: /opt/ros/fuerte/stacks/vision_opencv/opencv2/manifest.xml
 ../msg_gen/cpp/include/SkypeRobot/Hands.h: /opt/ros/fuerte/stacks/vision_opencv/cv_bridge/manifest.xml
-	$(CMAKE_COMMAND) -E cmake_progress_report /home/user/ros_workspace/sandbox/SkypeRobot/build/CMakeFiles $(CMAKE_PROGRESS_2)
+	$(CMAKE_COMMAND) -E cmake_progress_report /home/user/ros_workspace/sandbox/SkypeRobot/build/CMakeFiles $(CMAKE_PROGRESS_3)
 	@$(CMAKE_COMMAND) -E cmake_echo_color --switch=$(COLOR) --blue --bold "Generating ../msg_gen/cpp/include/SkypeRobot/Hands.h"
 	/opt/ros/fuerte/share/roscpp/rosbuild/scripts/genmsg_cpp.py /home/user/ros_workspace/sandbox/SkypeRobot/msg/Hands.msg
 
 ROSBUILD_genmsg_cpp: CMakeFiles/ROSBUILD_genmsg_cpp
 ROSBUILD_genmsg_cpp: ../msg_gen/cpp/include/SkypeRobot/Angles.h
+ROSBUILD_genmsg_cpp: ../msg_gen/cpp/include/SkypeRobot/Whells.h
 ROSBUILD_genmsg_cpp: ../msg_gen/cpp/include/SkypeRobot/Hands.h
 ROSBUILD_genmsg_cpp: CMakeFiles/ROSBUILD_genmsg_cpp.dir/build.make
 .PHONY : ROSBUILD_genmsg_cpp

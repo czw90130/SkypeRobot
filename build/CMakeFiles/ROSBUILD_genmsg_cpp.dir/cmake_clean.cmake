@@ -4,6 +4,7 @@ FILE(REMOVE_RECURSE
   "../msg_gen"
   "CMakeFiles/ROSBUILD_genmsg_cpp"
   "../msg_gen/cpp/include/SkypeRobot/Angles.h"
+  "../msg_gen/cpp/include/SkypeRobot/Whells.h"
   "../msg_gen/cpp/include/SkypeRobot/Hands.h"
 )
 
