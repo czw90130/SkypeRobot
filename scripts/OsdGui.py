@@ -18,7 +18,10 @@ class gui_generator:
         
         self.menu_bar = cv.LoadImage(imgdir+'menu_bar.jpg')
         self.menu_bar_msk = cv.LoadImage(imgdir+'menu_bar_msk.png', 0)
-        self.move_bk = cv.LoadImage(imgdir+'move_bk.jpg')
+        #self.move_bk = cv.LoadImage(imgdir+'move_bk.jpg')
+        self.whellslide_bk = cv.LoadImage(imgdir+'whellslide_bk.jpg')
+        self.whellslide_in = cv.LoadImage(imgdir+'whellslide_in.jpg')
+
         self.hp_r = cv.LoadImage(imgdir+'HandPointer.png')
         self.hp_r_msk = cv.LoadImage(imgdir+'HandPointer.png', 0)
         self.hp_r_bk = cv.LoadImage(imgdir+'HandPointer_outer_R0.jpg')
@@ -65,11 +68,35 @@ class gui_generator:
         cv.ResetImageROI(temp)
         cv.Copy(cv.GetMat(temp),bk_img)
 
-    def setMoveBk(self, bk_img):
-               
+    def setMoveBk(self, bk_img, lbase_x, lbase_y, rbase_x, rbase_y, ly, ry):
+
+        lbase_x = lbase_x - 30
+        lbase_y = lbase_y - 50
+        rbase_x = rbase_x - 30
+        rbase_y = rbase_y - 50
+        
+        if lbase_x>560 or rbase_x>560 or lbase_y>300 or rbase_y>300 or lbase_y<60 or rbase_y<60:
+            return 0
         temp = cv.GetImage(bk_img)
-        cv.AddWeighted(temp, 1.0, self.move_bk,  0.5, 0,temp)
+        #cv.AddWeighted(temp, 1.0, self.move_bk,  0.5, 0,temp)
+        cv.SetImageROI(temp,(rbase_x, rbase_y, 80, 120))
+        cv.AddWeighted(temp, 1.0, self.whellslide_bk, 1, 0,temp)
+        cv.ResetImageROI(temp)
+        cv.SetImageROI(temp,(rbase_x, rbase_y+ry, 80, 120))
+        cv.AddWeighted(temp, 1.0, self.whellslide_in, 1, 0,temp)
+        cv.ResetImageROI(temp)
+
+        cv.SetImageROI(temp,(lbase_x, lbase_y, 80, 120))
+        cv.AddWeighted(temp, 1.0, self.whellslide_bk, 1, 0,temp)
+        cv.ResetImageROI(temp)
+        cv.SetImageROI(temp,(lbase_x, lbase_y+ly, 80, 120))
+        cv.AddWeighted(temp, 1.0, self.whellslide_in, 1, 0,temp)
+        cv.ResetImageROI(temp)
+        
+
         cv.Copy(cv.GetMat(temp),bk_img)
+        return 1
+
 
     def setHandPointer(self, bk_img):
         temp_bk = cv.GetImage(bk_img)
@@ -199,32 +226,74 @@ class image_converter:
         self.whell_pub = rospy.Publisher('robotWhells', Whells)
 
         self.pre_whell = Whells()
+        self.lwhellbase_x = 0
+        self.lwhellbase_y = 0
+        self.rwhellbase_x = 0
+        self.rwhellbase_y = 0
         self.pre_whell.RightWhell = 0
         self.pre_whell.LeftWhell = 0
 
     def setWhells(self):
-
+        whell = Whells()
         if self.gui.rhand_st > 200 and self.gui.lhand_st > 200:
-            whell = Whells()
-            if self.gui.rhand_y + 30 < 220:
-                whell.RightWhell = 1
-            elif self.gui.rhand_y + 30 > 348:
-                whell.RightWhell = -1
-            else:
-                whell.RightWhell = 0
-
-            if self.gui.lhand_y + 30 < 220:
-                whell.LeftWhell = 1
-            elif self.gui.lhand_y + 30 > 348:
-                whell.LeftWhell = -1
-            else:
-                whell.LeftWhell = 0
-                
-            if whell.RightWhell != self.pre_whell.RightWhell or whell.LeftWhell != self.pre_whell.LeftWhell:
-                self.whell_pub.publish(whell)
-                self.pre_whell.RightWhell = whell.RightWhell
-                self.pre_whell.LeftWhell = whell.LeftWhell
             
+            if 0 == self.lwhellbase_x and 0 == self.lwhellbase_y and 0 == self.rwhellbase_x and 0 == self.rwhellbase_y:
+                self.lwhellbase_x = self.gui.lhand_x
+                self.lwhellbase_y = (self.gui.lhand_y + self.gui.rhand_y) / 2
+                self.rwhellbase_x = self.gui.rhand_x
+                self.rwhellbase_y = self.lwhellbase_y #Stay same with lbase
+            else:
+                ly = self.gui.lhand_y - self.lwhellbase_y
+                if ly < -60:
+                    ly = -60
+                elif ly > 60:
+                    ly = 60
+                ry = self.gui.rhand_y - self.rwhellbase_y
+                if ry < -60:
+                    ry = -60
+                elif ry > 60:
+                    ry = 60
+                
+                r = -ry/6
+                if r > 0:
+                    if r < 4:
+                        whell.RightWhell = 0
+                    else:
+                        whell.RightWhell = r - 4
+                else:
+                    if r > -4:
+                        whell.RightWhell = 0
+                    else:
+                        whell.RightWhell = r + 4
+
+                l = -ly/6
+                if l > 0:
+                    if l < 4:
+                        whell.LeftWhell = 0
+                    else:
+                        whell.LeftWhell = l - 4
+                else:
+                    if l > -4:
+                        whell.LeftWhell = 0
+                    else:
+                        whell.LeftWhell = l + 4
+                
+        
+
+                self.gui.setMoveBk(self.bk_image, self.lwhellbase_x, self.lwhellbase_y, self.rwhellbase_x, self.rwhellbase_y, ly, ry)
+                
+        else:
+            whell.LeftWhell = 0
+            whell.RightWhell = 0
+            self.lwhellbase_x = 0
+            self.lwhellbase_y = 0
+            self.rwhellbase_x = 0
+            self.rwhellbase_y = 0
+
+        if whell.RightWhell != self.pre_whell.RightWhell or whell.LeftWhell != self.pre_whell.LeftWhell:
+            self.whell_pub.publish(whell)
+            self.pre_whell.RightWhell = whell.RightWhell
+            self.pre_whell.LeftWhell = whell.LeftWhell
             
 
     
@@ -246,7 +315,6 @@ class image_converter:
         
         #Set the background
         # if mode == move
-        self.gui.setMoveBk(self.bk_image)
 
         self.gui.setHandPointer(self.bk_image)
         # if mode == move
