@@ -18,7 +18,11 @@ class gui_generator:
         
         self.menu_bar = cv.LoadImage(imgdir+'menu_bar.jpg')
         self.menu_bar_msk = cv.LoadImage(imgdir+'menu_bar_msk.png', 0)
-        #self.move_bk = cv.LoadImage(imgdir+'move_bk.jpg')
+
+        self.move_bk = cv.LoadImage(imgdir+'move_bk.jpg')
+        self.g_cube = cv.LoadImage(imgdir+'greenCube.jpg')
+        self.r_cube = cv.LoadImage(imgdir+'redCube.jpg')
+        
         self.whellslide_bk = cv.LoadImage(imgdir+'whellslide_bk.jpg')
         self.whellslide_in = cv.LoadImage(imgdir+'whellslide_in.jpg')
 
@@ -66,6 +70,35 @@ class gui_generator:
         cv.ResetImageROI(self.menu_bk)
 
         cv.ResetImageROI(temp)
+        cv.Copy(cv.GetMat(temp),bk_img)
+
+    def setButton(self, bk_img, x, y, arm, move):
+
+        temp = cv.GetImage(bk_img)
+        m = move*80/100
+        a = arm*85/100
+
+        if y<470 and y>320 and x<160 and x>15 : 
+            rel = 1
+        else:
+            rel = 0.1
+
+        cv.AddWeighted(temp, 1.0, self.move_bk, rel, 0,temp)
+
+        cv.SetImageROI(temp,(24+m, 370, 51, 47))
+        if move < 50:
+            cv.AddWeighted(temp, 1.0, self.r_cube, rel, 0,temp)
+        else:
+            cv.AddWeighted(temp, 1.0, self.g_cube, rel, 0,temp)
+        cv.ResetImageROI(temp)
+
+        cv.SetImageROI(temp,(65, 329+a, 51, 47))
+        if arm < 50:
+            cv.AddWeighted(temp, 1.0, self.r_cube, rel, 0,temp)
+        else:
+            cv.AddWeighted(temp, 1.0, self.g_cube, rel, 0,temp)
+        cv.ResetImageROI(temp)
+
         cv.Copy(cv.GetMat(temp),bk_img)
 
     def setMoveBk(self, bk_img, lbase_x, lbase_y, rbase_x, rbase_y, ly, ry):
@@ -167,18 +200,18 @@ class gui_generator:
             if self.lhand_st <15:
                 self.lhand_st = self.lhand_st + 1
             
-            if(2 > self.lhand_st):
-                self.lhand_x = data.HandXLeft
-                self.lhand_y = data.HandYLeft 
+            #if(2 > self.lhand_st):
+            self.lhand_x = data.HandXLeft
+            self.lhand_y = data.HandYLeft 
     
         elif data.ShoulderElbowWristLeft > 90 - bias:
             self.lhand_st = self.lhand_st - 5
             if self.lhand_st < 0:
                self.lhand_st = 0
 
-            if(2 > self.lhand_st):
-                self.lhand_x = data.HandXLeft
-                self.lhand_y = data.HandYLeft 
+            #if(2 > self.lhand_st):
+            self.lhand_x = data.HandXLeft
+            self.lhand_y = data.HandYLeft 
  
 
         bias = math.fabs(data.HandXRight-320)*22/320 +  math.fabs(data.HandYRight-240)*22/240
@@ -225,6 +258,9 @@ class image_converter:
 
         self.whell_pub = rospy.Publisher('robotWhells', Whells)
 
+        self.move_state = 0
+        self.arm_state = 0
+
         self.pre_whell = Whells()
         self.lwhellbase_x = 0
         self.lwhellbase_y = 0
@@ -232,6 +268,72 @@ class image_converter:
         self.rwhellbase_y = 0
         self.pre_whell.RightWhell = 0
         self.pre_whell.LeftWhell = 0
+
+    def setButtons(self):
+        
+        x = self.gui.lhand_x - 30
+        y = self.gui.lhand_y - 30
+
+        if 1 == self.move_state & 1 and self.gui.lhand_st > 200 and self.gui.rhand_st > 200:
+            return
+
+        if 0 == self.move_state & 1 and 0 == self.move_state & 2:
+            if self.gui.lhand_st > 200 and y<370 and y>320 and x<75 and x>20 and 0 == self.arm_state & 2:
+                self.move_state = 2
+            self.move = 0
+        elif 1 == self.move_state & 1 and 0 == self.move_state & 2:
+            if self.gui.lhand_st > 200 and y<370 and y>320 and x<155 and x>100 and 0 == self.arm_state & 2:
+                self.move_state = 3
+            self.move = 100
+        elif 2 == self.move_state & 2:
+            if self.gui.lhand_st > 200:
+                self.move = x - 24*100/80
+                if self.move < 0:
+                    self.move = 0
+                elif self.move > 100:
+                    self.move = 100
+            else:
+                whell = Whells()
+                if self.move > 50:
+                    self.move_state = 1
+                    self.move = 100
+                else:
+                    self.move_state = 0
+                    self.move = 0
+                whell.MoveState = self.move_state
+                whell.ArmState = self.arm_state
+                self.whell_pub.publish(whell)
+
+        #ARM
+        y = self.gui.lhand_y + 30
+        if 0 == self.arm_state & 1 and 0 == self.arm_state & 2:
+            if self.gui.lhand_st > 200 and y<385 and y>325 and x<115 and x>65  and 0 == self.move_state & 2:
+                self.arm_state = 2
+            self.arm = 0
+        elif 1 == self.arm_state & 1 and 0 == self.arm_state & 2:
+            if self.gui.lhand_st > 200 and y<470 and y>410 and x<115 and x>65  and 0 == self.move_state & 2:
+                self.arm_state = 3
+            self.arm = 100
+        elif 2 == self.arm_state & 2:
+            if self.gui.lhand_st > 200:
+                self.arm = y - 325*100/85
+                if self.arm < 0:
+                    self.arm = 0
+                elif self.arm > 100:
+                    self.arm = 100
+            else:
+                whell = Whells()
+                if self.arm > 50:
+                    self.arm_state = 1
+                    self.arm = 100
+                else:
+                    self.arm_state = 0
+                    self.arm = 0
+                whell.ArmState = self.arm_state
+                whell.MoveState = self.move_state
+                self.whell_pub.publish(whell)
+        
+        self.gui.setButton(self.bk_image, x, y, self.arm, self.move)
 
     def setWhells(self):
         whell = Whells()
@@ -291,6 +393,8 @@ class image_converter:
             self.rwhellbase_y = 0
 
         if whell.RightWhell != self.pre_whell.RightWhell or whell.LeftWhell != self.pre_whell.LeftWhell:
+            whell.ArmState = self.arm_state
+            whell.MoveState = self.move_state
             self.whell_pub.publish(whell)
             self.pre_whell.RightWhell = whell.RightWhell
             self.pre_whell.LeftWhell = whell.LeftWhell
@@ -314,11 +418,13 @@ class image_converter:
         #self.gui.setMenu(self.bk_image, 10)
         
         #Set the background
+        self.setButtons()
+
         # if mode == move
+        if 1 == self.move_state & 1:
+            self.setWhells()
 
         self.gui.setHandPointer(self.bk_image)
-        # if mode == move
-        self.setWhells()
         
         
         cv.ShowImage("Image window", self.bk_image)
