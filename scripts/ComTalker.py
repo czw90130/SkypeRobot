@@ -16,7 +16,7 @@ class AppCommunication(object):
         self.HandMessage = '0:'
         self.KeepRuning = True
         
-        self.Serial = seri`al.Serial(port = port, baudrate = baudrate, timeout = 1)
+        self.Serial = serial.Serial(port = port, baudrate = baudrate, timeout = 1)
         self.ReceiverThread = threading.Thread(target=self.Listen)
         self.ReceiverThread.setDaemon(True)
         self.ReceiverThread.start()
@@ -114,10 +114,9 @@ def talker():
     rospy.init_node('talker')
     perSkeMsg = '?'
     perHanMsg = '?'
-    skype = AppCommunication('DemoTest')
+    skype = AppCommunication()
     stopDy = 0
     while not rospy.is_shutdown():
-        str = "State:" + skype.textState
 	
 	SkeMsg = skype.SkeletonMessage
 	if SkeMsg != perSkeMsg: 
