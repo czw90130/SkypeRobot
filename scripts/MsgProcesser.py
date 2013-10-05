@@ -3,6 +3,7 @@ import roslib; roslib.load_manifest('SkypeRobot')
 import rospy
 from SkypeRobot.msg import Angles
 from SkypeRobot.msg import Hands
+from SkypeRobot.msg import Whells
 from std_msgs.msg import String
 from std_msgs.msg import Float64
 
@@ -305,10 +306,33 @@ skePar = Parse()
 hanPar = HandParse()
 
 def skeleton_callback(data):
-    skePar.callback(str(data))	
+	skePar.callback(str(data))	
 
 def hand_callback(data):
-    hanPar.parseHands(str(data))
+	hanPar.parseHands(str(data))
+
+
+Arm_state = False
+Whell_state = True
+Whell_left = 0
+Whell_right = 0
+def state_onoff(data):
+	if 0 == data.MoveState:
+		Whell_state = False
+		Whell_left = 0
+		Whell_right = 0
+	else:
+		Whell_state = True
+		Whell_left = data.LeftWhell
+		Whell_right = data.RightWhell
+	if 0 == data.ArmState:
+		Arm_state = False
+	else:
+		Arm_state = True
+
+	
+
+	
 
 
 def MsgProcesser():
@@ -324,6 +348,7 @@ def MsgProcesser():
     rospy.init_node('MsgProcesser')
     rospy.Subscriber('skypeSkeletonMsg', String, skeleton_callback)
     rospy.Subscriber('skypeHandMsg', String, hand_callback)
+    rospy.Subscriber('robotWhells', Whells, hand_callback)
     angle = Angles()
     hand = Hands()
     hand.HandLeft = 32768
@@ -342,7 +367,7 @@ def MsgProcesser():
 		    hand.HandRight =  hanPar.hands.HandRight
 
               ##########################Change Here!!####################################
-	    if skePar.preangle.TrackedNum != 0:
+	    if skePar.preangle.TrackedNum != 0 and Arm_state:
 		    if angle.ShoulderElbowXLeft<=90:
 			    tp =  -float(angle.ShoulderElbowXLeft)*0.017   
 			    pub01.publish(tp)
