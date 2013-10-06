@@ -3,9 +3,7 @@ import roslib; roslib.load_manifest('SkypeRobot')
 import rospy
 from std_msgs.msg import String
 
-import threading
-import serial
-from cStringIO import StringIO
+from SerialDataGateway import SerialDataGateway
 
 
 
@@ -14,24 +12,13 @@ class AppCommunication(object):
     def __init__(self, port="/dev/ttyUSB0", baudrate=115200):
 	self.SkeletonMessage = '0:'
         self.HandMessage = '0:'
-        self.KeepRuning = True
         
-        self.Serial = serial.Serial(port = port, baudrate = baudrate, timeout = 1)
-        self.ReceiverThread = threading.Thread(target=self.Listen)
-        self.ReceiverThread.setDaemon(True)
-        self.ReceiverThread.start()
+        port = rospy.get_param("~port", "/dev/ttyUSB0")
+        baudRate = int(rospy.get_param("~baudRate", "115200"))
+        self.Serial = SerialDataGateway(port, baudrate, ApplicationReceiving)
+        self.Serial.Start()
 
-    def Listen(self):
-        stringIO = StringIO()
-        while self.KeepRuning:
-            data = self.Serial.read()
-            if data == '\0':
-                self.ApplicationReceiving(stringIO.getvalue())
-                stringIO.close()
-                stringIO = StringIO()
-            else:
-                stringIO.write(data)
-	
+
 
     def SendMsg(self, data):
         msgout = ApplicationMessage()
@@ -42,9 +29,8 @@ class AppCommunication(object):
 
     def StopApp(self):
         rospy.loginfo("Stopping serial gateway")
-        self.KeepRuning = False
         time.sleep(.1)
-        self.Serial.close()
+        self.Serial.Stop()
 	
 
     def ApplicationReceiving(self, stream):
