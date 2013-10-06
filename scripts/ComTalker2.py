@@ -15,8 +15,8 @@ class AppCommunication(object):
         
         port = rospy.get_param("~port", "/dev/ttyUSB0")
         baudRate = int(rospy.get_param("~baudRate", "115200"))
-        self.Serial = SerialDataGateway(port, baudrate, ApplicationReceiving)
-        self.Serial.Start()
+        self.Serial = SerialDataGateway(port, baudrate, self.ApplicationReceiving)
+        
 
 
 
@@ -26,6 +26,11 @@ class AppCommunication(object):
         msgout.Data = data
         self.Serial.write(msgout.ToString())
 
+
+    def StartApp(self):
+        rospy.loginfo("Starting serial gateway")
+        time.sleep(.1)
+        self.Serial.Start()
 
     def StopApp(self):
         rospy.loginfo("Stopping serial gateway")
@@ -102,6 +107,7 @@ def talker():
     perHanMsg = '?'
     skype = AppCommunication()
     stopDy = 0
+    skype.StartApp()
     while not rospy.is_shutdown():
 	
 	SkeMsg = skype.SkeletonMessage
